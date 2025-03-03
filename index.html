@@ -1,0 +1,96 @@
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Web Game</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            background: #ddd;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <h2>Dodge!by Use the left and right arrow keys to move</h2>
+    <canvas id="gameCanvas" width="400" height="500"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Load images
+        const playerImg = new Image();
+        playerImg.src = "assets/player.png"; // Update with your actual path
+
+        const obstacleImg = new Image();
+        obstacleImg.src = "assets/obstacle.png"; // Update with your actual path
+
+        let player = { x: 175, y: 450, width: 50, height: 50, speed: 5 };
+        let obstacles = [];
+        let gameOver = false;
+        let score = 0;
+
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "ArrowLeft" && player.x > 0) {
+                player.x -= player.speed;
+            } else if (event.key === "ArrowRight" && player.x + player.width < canvas.width) {
+                player.x += player.speed;
+            }
+        });
+
+        function createObstacle() {
+            let width = 50;
+            let x = Math.random() * (canvas.width - width);
+            obstacles.push({ x: x, y: 0, width: width, height: 50, speed: 3 });
+        }
+
+        function updateGame() {
+            if (gameOver) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the player
+            ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+
+            // Draw and update obstacles
+            obstacles.forEach((obstacle, index) => {
+                obstacle.y += obstacle.speed;
+                ctx.drawImage(obstacleImg, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+
+                // Check for collisions
+                if (
+                    player.x < obstacle.x + obstacle.width &&
+                    player.x + player.width > obstacle.x &&
+                    player.y < obstacle.y + obstacle.height &&
+                    player.y + player.height > obstacle.y
+                ) {
+                    gameOver = true;
+                    alert("Game Over! Your score: " + score);
+                    document.location.reload();
+                }
+
+                // Remove obstacles that go off screen
+                if (obstacle.y > canvas.height) {
+                    obstacles.splice(index, 1);
+                    score++;
+                }
+            });
+        }
+
+        function gameLoop() {
+            updateGame();
+            requestAnimationFrame(gameLoop);
+        }
+
+        setInterval(createObstacle, 1000);
+        gameLoop();
+    </script>
+</body>
+</html>
+```
